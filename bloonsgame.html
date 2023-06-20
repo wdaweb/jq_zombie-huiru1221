@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloons Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            margin: 0;
+
+        }
+
+        #main {
+            width: 100%;
+            margin: auto;
+            height: 568px;
+            text-align: center;
+        }
+
+        #menu {
+            width: 100%;
+            position: absolute;
+            top: 20px;
+
+        }
+
+        #game {
+            width: 100%;
+            height: calc(100vh - 128px);
+            background: black;
+            overflow: hidden;
+            position: relative;
+            top: 110px;
+            cursor: url(./images/cursor1.png) 0 50, auto;
+            background-image: url("./images/gamebackground2.gif");
+            background-size: 100% 100%;
+            margin: auto;
+
+        }
+
+        #game>img {
+            height: 100px;
+            position: absolute;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .ribbon {
+            /* 忽略點擊事件 */
+            pointer-events: none;
+        }
+
+        .swal2-icon-content {
+            font-family: Montserrat;
+        }
+
+        input {
+            width: 200px;
+            height: 82px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            background: transparent;
+        }
+
+        #start {
+            width: 200px;
+            height: 82px;
+            background-image: url(./images/start.png);
+            text-align: center;
+            margin: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .list {
+            margin: 10px 45px;
+            font-size: 40px;
+            font-family: 'Press Start 2P', cursive;
+            color: cornflowerblue;
+            float: left;
+            line-height: 30px;
+
+        }
+
+        .no-border {
+            border: none !important;
+
+        }
+
+        .change img {
+            width: 100px;
+            padding-top: 110px;
+            margin: 0px 105px;
+        }
+
+        .weapon {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="menu">
+            <div class="list"><img src="./images/score.png" width="50px"><span id="text-score">0</span></div>
+            <div class="list"><img src="./images/time.png" width="50px"><span id="text-time">0</span> second</div>
+            <div class="list"><img src="./images/player.png" width="50px"><span id="text-highscorename">nobody</span>
+            </div>
+            <div class="list"><img src="./images/bestscore.png" width="50px"><span id="text-highscore">0</span></div>
+        </div>
+        <br>
+        <div id="game">
+            <div class="weapon">
+
+                <span class="change"><img src="./images/weapon1.png"></span>
+                <span class="change"><img src="./images/weapon2.png"></span>
+                <span class="change"><img src="./images/weapon3.png"></span>
+                <span class="change"><img src="./images/weapon4.png"></span>
+            </div>
+        </div>
+        <br>
+        <div id="start"><input type="button" value="" id="btn-start"></div>
+    </div>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js'
+        integrity='sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ=='
+        crossorigin='anonymous'></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+
+        let score = 0
+        let countdown = 0
+        let timer = 0
+
+        const highscore = localStorage.bloon ? JSON.parse(localStorage.bloon) : { name: 'nobody', score: 0 }
+        $('#text-highscorename').text(highscore.name)
+        $('#text-highscore').text(highscore.score)
+
+        let count = 5;
+        let distance = 100
+
+        $('#btn-start').click(function () {
+            $('#start').css('display', 'none')
+            score = 0
+            $('#text-score').text(score)
+            countdown = 20
+            $('#text-time').text(countdown)
+            timer = setInterval(function () {
+                countdown--
+                $('#text-time').text(countdown)
+                const random = Math.ceil(Math.random() * 10)
+                if ($('.bloon').length < count) {
+                    console.log("生成一個");
+                    console.log('count')
+                    const top = Math.round(Math.random() * 100) + '%'
+                    const left = Math.round(Math.random() * 30) + 'px'
+                    const random1 = Math.ceil(Math.random() * 6)
+                    const bloon = $(`<img src="./images/bloon${random1}.png" class="bloon" style="top: ${top}; left: ${left}">`)
+                    $('#game').append(bloon)
+                    move(bloon)
+                }
+                if (countdown === 0) {
+                    $('.weapon').css('display', 'block')
+                    clearInterval(timer)
+                    $('#game .bloon').remove()
+                    $('#game .ribbon').remove()
+
+
+                    if (score > highscore.score) {
+                        Swal.fire({
+                            iconHtml: '<img src="./images/win1.png">',
+                            title: '時間到',
+                            text: `最高分，你得到 ${score} 分`,
+                            input: 'text',
+                            inputPlaceholder: '請輸入玩家名字',
+                            inputAttributes: {
+                                required: true
+                            },
+                            validationMessage: '名稱必填',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            customClass: {
+                                icon: 'no-border'
+                            }
+                        }).then(function (result) {
+                            highscore.name = result.value
+                            highscore.score = score
+                            $('#text-highscorename').text(highscore.name)
+                            $('#text-highscore').text(highscore.score)
+
+                            localStorage.bloon = JSON.stringify(highscore)
+                        })
+
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: '時間到',
+                            text: `你得到 ${score} 分`
+                        })
+                    }
+                }
+            }, 1000)
+        })
+
+        function move(bloon) {
+            const top = Math.round(Math.random() * distance) + '%'
+            const left = Math.round(Math.random() * distance) + '%'
+            bloon.animate({ top, left }, 2000, function () {
+                move(bloon)
+            })
+        }
+
+        $('#game').on('click', '.bloon', function () {
+            $(this).attr('src', './images/bloonbroken.gif')
+            $(this).removeClass('bloon').addClass('ribbon')
+            $(this).stop()
+            score++
+            $('#text-score').text(score)
+        })
+
+        $('.change').each(function (index, change) {
+            $(this).on('click', function () {
+                if (index == 0) {
+                    distance = 50
+                } else if (index == 1) {
+                    distance = 100
+                } else if (index == 2) {
+                    distance = 150
+                } else if (index == 3) {
+                    distance = 200
+                }
+                $('#game').css('cursor', `url(./images/cursor${index + 1}.png) 0 50, auto`)
+                $('.weapon').css('display', 'none')
+                $('#start').css('display', 'block')
+            })
+        })
+    </script>
+</body>
+
+</html>

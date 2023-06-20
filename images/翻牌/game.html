@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            width: 100%;
+            background: url(./disney_castle-High_quality_wallpaper_1366x768.jpg) no-repeat;
+            background-size: 100vw 100vh;
+            cursor: url("./zzpic6151_sc115.png") 0 0, auto;
+        }
+
+        .card {
+            width: 50px;
+            height: 90px;
+            position: relative;
+            float: left;
+            margin: 10px;
+            /* 設定子元素在 3D 空間內 */
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+
+        .card-front {
+            width: 100%;
+            height: 100%;
+            background-image: url('./1.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: absolute;
+            /* 隱藏背面 */
+            backface-visibility: hidden;
+        }
+
+        .card-back {
+            width: 100%;
+            height: 100%;
+            background-image: url('./cardback1.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: absolute;
+            /* 隱藏背面 */
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+        }
+
+        .card-close {
+            transform: rotateY(180deg);
+        }
+
+        #game {
+            width: 300px;
+            height: 300px;
+            margin: auto;
+
+        }
+
+        #theme {
+            position: absolute;
+            left: 80%;
+            top: 70%;
+            transform: translate(-80%, -70%);
+        }
+
+        input {
+            width: 140px;
+            height: 40px;
+            color: white;
+            background-image: linear-gradient(rgb(237, 124, 124), rgb(222, 123, 242), rgb(141, 142, 239));
+            border: 1px solid yellow;
+            border-radius: 20px;
+            font-weight: bold;
+            display: block;
+            margin: 10px;
+            box-shadow: 1px 1px 5px darkred;
+            transform-origin: center;
+            cursor: url("./zzpic6151_sc115.png") 0 0, auto;
+        }
+
+        input:hover {
+            background: darkslateblue;
+            color: white;
+            transform: scale(0.9);
+        }
+
+        #photo {
+            position: absolute;
+            left: 5%;
+            top: 20%;
+        }
+
+
+
+        /* .star {
+            width: 10px;
+            height: 10px;
+            transform: translate();
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="game"></div>
+    <div id="theme">
+        <input class="theme" type="button" value="冰雪奇緣">
+        <input class="theme" type="button" value="仙杜瑞拉">
+        <input class="theme" type="button" value="小美人魚">
+    </div>
+    <div id="photo">
+        <img class="doll" src="./doll1.png" width="300px">
+        <img class="doll" src="./doll2.png" width="200px">
+        <img class="doll" src="./doll3.png" width="300px">
+    </div>
+    <script src="./jquery-3.6.4.min.js"></script>
+    <script>
+        for (let i = 0; i < 16; i++) {
+            $('#game').append(`
+                <div class="card card-close">
+                    <div class="card-front"></div>
+                    <div class="card-back"></div>
+                </div>
+            `)
+        }
+        for (let i = 0; i < 16; i++) {
+            const num = i % 8 + 1
+            $('.card').eq(i).find('.card-front').css('background-image', `url(./${num}.png)`)
+            $('.card').eq(i).attr('data-card', num)
+            const target = Math.round(Math.random() * 15)
+            $('.card').eq(target).insertAfter($('.card').eq(i))
+        }
+        $('#game').on('click', '.card', function () {
+            if (
+                // 如果還沒翻開兩張
+                $('.card:not(.card-close)').length < 2 &&
+                // 且這張牌還沒翻開
+                $(this).hasClass('card-close') &&
+                // 且這張牌還沒配對
+                !$(this).hasClass('card-ok')) {
+                $(this).removeClass('card-close')
+            }
+            // 如果翻開兩張了
+            if ($('.card:not(.card-close)').length === 2) {
+                // 檢查數字
+                if ($('.card:not(.card-close)').eq(0).attr('data-card') ===
+                    $('.card:not(.card-close)').eq(1).attr('data-card')
+                ) {
+                    $('.card:not(.card-close)').addClass('card-ok')
+                    $('.card:not(.card-close)').fadeTo(1000, 0)
+                }
+                // 不管數字是否一樣都翻回來
+                setTimeout(function () {
+                    $('.card:not(.card-close)').addClass('card-close')
+                    if ($('.card-ok').length === $('.card').length) {
+                        alert('恭喜')
+                    }
+                }, 1000)
+            }
+        })
+        $('.theme').each(function (index, theme) {
+            $(this).on('click', function () {
+                // for (let i = 0; i < $('.theme').length; i++)
+                // $('.card-back').attr('src', `./cardback${i + 1}.png`)
+                $('.card-back').css('background-image', `url(./cardback${index + 1}.png)`)
+            })
+
+            $(this).on('mouseover', function () {
+                for (let i = 0; i < $('.doll').length; i++) {
+                    $('.doll').eq(i).css('display', `none`)
+                }
+                $('.doll').eq(index).css('display', `block`)
+            })
+        })
+        $('.theme').eq(0).mouseover()
+
+        // $('.photo').each(function(index, photo) {
+        //     $(theme).on('mouseover', function () {
+        //         $('.doll').eq()
+        //     })
+        // })
+
+
+    </script>
+</body>
+
+</html>
